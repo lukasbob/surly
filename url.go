@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 // URL is a wrapper for the url.URL type that allows json unmarshaling
@@ -37,9 +38,9 @@ func New(u *url.URL) *URL {
 
 // UnmarshalJSON implements the json.Unmarshaler interface
 func (u *URL) UnmarshalJSON(b []byte) error {
-	url, err := url.Parse(string(bytes.Trim(b, `"`)))
+	parsed, err := url.Parse(string(bytes.TrimSpace(bytes.Trim(b, `"`))))
 	if err == nil {
-		u.URL = url
+		u.URL = parsed
 	}
 	return err
 }
@@ -53,9 +54,9 @@ func (u *URL) MarshalJSON() ([]byte, error) {
 func (u *URL) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var v string
 	d.DecodeElement(&v, &start)
-	url, err := url.Parse(v)
+	parsed, err := url.Parse(strings.TrimSpace(v))
 	if err == nil {
-		u.URL = url
+		u.URL = parsed
 	}
 	return err
 }
