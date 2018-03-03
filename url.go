@@ -1,4 +1,4 @@
-// Package surly wraps std library's url to make it marshalable and unmarshalable to various formats
+// Package surly provides a URL string that is to marshalable and unmarshalable to various formats
 package surly
 
 import (
@@ -9,47 +9,51 @@ import (
 	"strings"
 )
 
-// URL is a wrapper for the url.URL type that allows json unmarshaling
-type URL string
+// URL wraps a string that is guaranteed to be a valid URL
+type URL struct {
+	u string
+}
 
-// New creates a new URL from a url.URL.
-func New(rawurl string) (URL, error) {
-	_, err := url.Parse(rawurl)
-	if err != nil {
-		return "", err
+// New creates a new URL from a string
+func New(rawurl string) (u URL, err error) {
+	if _, err = url.Parse(rawurl); err == nil {
+		u.u = rawurl
 	}
-	return URL(rawurl), nil
+	return
 }
 
 // Parsed returns url.URL representation of the URL string
 func (u URL) Parsed() *url.URL {
-	parsed, _ := url.Parse(string(u))
+	parsed, _ := url.Parse(u.u)
 	return parsed
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
-func (u URL) UnmarshalJSON(b []byte) error {
+func (u *URL) UnmarshalJSON(b []byte) error {
 	var err error
 	val := string(bytes.TrimSpace(bytes.Trim(b, `"`)))
-	u, err = New(val)
+	*u, err = New(val)
 	return err
 }
 
 // MarshalJSON implements the json.Marshaler interface
 func (u URL) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, u)), nil
+	return []byte(fmt.Sprintf(`"%s"`, u.u)), nil
 }
 
 // UnmarshalXML immplements the xml.Unmarshaler interface
-func (u URL) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
+func (u *URL) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	var v string
 	d.DecodeElement(&v, &start)
-	val := strings.TrimSpace(v)
-	u, err = New(val)
+	*u, err = New(strings.TrimSpace(v))
 	return err
 }
 
 // ResolveReference resolves a URI reference by delegating to the underlying url.URL's implementation
 func (u URL) ResolveReference(other URL) URL {
-	return URL(u.Parsed().ResolveReference(other.Parsed()).String())
+	return URL{u.Parsed().ResolveReference(other.Parsed()).String()}
+}
+
+func (u URL) String() string {
+	return u.u
 }
