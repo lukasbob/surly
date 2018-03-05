@@ -14,8 +14,6 @@ type Test struct {
 	URL     surly.URL `json:"url" xml:"url"`
 }
 
-var u, _ = surly.New("http://example.com")
-
 func TestURL_MarshalJSON(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -25,7 +23,7 @@ func TestURL_MarshalJSON(t *testing.T) {
 	}{
 		{
 			name: "Simple",
-			t:    &Test{URL: u},
+			t:    &Test{URL: surly.MustParse("http://example.com")},
 			want: `{"url":"http://example.com"}`,
 		},
 	}
@@ -56,7 +54,7 @@ func TestURL_UnmarshalJSON(t *testing.T) {
 	}{
 		{
 			name: "Valid URL",
-			u:    &Test{URL: u},
+			u:    &Test{URL: surly.MustParse("http://example.com")},
 			args: args{b: `{"url":"http://example.com"}`},
 		},
 		{
@@ -88,12 +86,12 @@ func TestURL_UnmarshalXML(t *testing.T) {
 	}{
 		{
 			name: "Valid URL",
-			u:    &Test{URL: u},
+			u:    &Test{URL: surly.MustParse("http://example.com")},
 			args: args{b: `<test><url>http://example.com</url></test>`},
 		},
 		{
 			name: "With CDATA",
-			u:    &Test{URL: u},
+			u:    &Test{URL: surly.MustParse("http://example.com")},
 			args: args{b: `<test><url><![CDATA[http://example.com]]></url></test>`},
 		},
 		{

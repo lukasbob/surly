@@ -14,6 +14,15 @@ type URL struct {
 	u string
 }
 
+// MustParse creates a new URL from a valid URL string, or panics on error
+func MustParse(rawurl string) URL {
+	u, err := New(rawurl)
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
+
 // New creates a new URL from a string
 func New(rawurl string) (u URL, err error) {
 	if _, err = url.Parse(rawurl); err == nil {
