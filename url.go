@@ -2,9 +2,6 @@
 package surly
 
 import (
-	"bytes"
-	"encoding/xml"
-	"fmt"
 	"net/url"
 	"strings"
 )
@@ -37,30 +34,14 @@ func (u URL) Parsed() *url.URL {
 	return parsed
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface
-func (u *URL) UnmarshalJSON(b []byte) error {
-	var err error
-	val := string(bytes.TrimSpace(bytes.Trim(b, `"`)))
-	*u, err = New(val)
-	return err
+//MarshalText implements the encoding.TextMarshaler interface
+func (u URL) MarshalText() ([]byte, error) {
+	return []byte(u.String()), nil
 }
 
-// MarshalJSON implements the json.Marshaler interface
-func (u URL) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, u.u)), nil
-}
-
-// UnmarshalXML implements the xml.Unmarshaler interface
-func (u *URL) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
-	var v string
-	d.DecodeElement(&v, &start)
-	*u, err = New(strings.TrimSpace(v))
-	return err
-}
-
-// UnmarshalXMLAttr implements the xml.UnmarshalerAttr interface
-func (u *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	*u, err = New(strings.TrimSpace(attr.Value))
+// UnmarshalText implements the encoding.TextUnarshaler interface
+func (u *URL) UnmarshalText(text []byte) (err error) {
+	*u, err = New(strings.TrimSpace(string(text)))
 	return err
 }
 

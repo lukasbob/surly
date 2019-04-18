@@ -75,6 +75,37 @@ func TestURL_UnmarshalJSON(t *testing.T) {
 	}
 }
 
+func TestURL_MarshalXML(t *testing.T) {
+	tests := []struct {
+		name    string
+		t       *Test
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "XML value",
+			t:    &Test{URL: surly.MustParse("http://example.com")},
+			want: []byte(`<test urlattr=""><url>http://example.com</url></test>`),
+		},
+		{
+			name: "XML attribute",
+			t:    &Test{URLAttr: surly.MustParse("http://example.com")},
+			want: []byte(`<test urlattr="http://example.com"><url></url></test>`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := xml.Marshal(tt.t)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("URL.MarshalXML() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(tt.want, got) {
+				t.Errorf("want %s, got %s", tt.want, got)
+			}
+		})
+	}
+}
+
 func TestURL_UnmarshalXML(t *testing.T) {
 	type args struct {
 		b string
