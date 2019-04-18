@@ -25,7 +25,7 @@ func TestURL_MarshalJSON(t *testing.T) {
 		{
 			name: "Simple",
 			t:    &Test{URL: surly.MustParse("http://example.com")},
-			want: `{"url":"http://example.com"}`,
+			want: `{"url":"http://example.com","urlattr":""}`,
 		},
 	}
 
