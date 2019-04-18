@@ -12,6 +12,7 @@ import (
 type Test struct {
 	XMLName xml.Name  `json:"-" xml:"test"`
 	URL     surly.URL `json:"url" xml:"url"`
+	URLAttr surly.URL `json:"urlattr" xml:"urlattr,attr"`
 }
 
 func TestURL_MarshalJSON(t *testing.T) {
@@ -78,6 +79,7 @@ func TestURL_UnmarshalXML(t *testing.T) {
 	type args struct {
 		b string
 	}
+	name := xml.Name{Local: "test"}
 	tests := []struct {
 		name    string
 		u       *Test
@@ -86,17 +88,22 @@ func TestURL_UnmarshalXML(t *testing.T) {
 	}{
 		{
 			name: "Valid URL",
-			u:    &Test{URL: surly.MustParse("http://example.com")},
+			u:    &Test{XMLName: name, URL: surly.MustParse("http://example.com")},
 			args: args{b: `<test><url>http://example.com</url></test>`},
 		},
 		{
 			name: "With CDATA",
-			u:    &Test{URL: surly.MustParse("http://example.com")},
+			u:    &Test{XMLName: name, URL: surly.MustParse("http://example.com")},
 			args: args{b: `<test><url><![CDATA[http://example.com]]></url></test>`},
 		},
 		{
+			name: "In attr",
+			u:    &Test{XMLName: name, URLAttr: surly.MustParse("http://example.com")},
+			args: args{b: `<test urlattr="http://example.com"></test>`},
+		},
+		{
 			name:    "Invalid URL",
-			u:       nil,
+			u:       &Test{XMLName: name},
 			args:    args{b: `<test><url>[foul] http://example.com</url></test>`},
 			wantErr: true,
 		},
@@ -106,6 +113,9 @@ func TestURL_UnmarshalXML(t *testing.T) {
 			var test Test
 			if err := xml.Unmarshal([]byte(tt.args.b), &test); (err != nil) != tt.wantErr {
 				t.Errorf("URL.UnmarshalXML() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !reflect.DeepEqual(&test, tt.u) {
+				t.Errorf("want %+v; got %+v", tt.u, &test)
 			}
 		})
 	}

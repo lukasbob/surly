@@ -50,11 +50,17 @@ func (u URL) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, u.u)), nil
 }
 
-// UnmarshalXML immplements the xml.Unmarshaler interface
+// UnmarshalXML implements the xml.Unmarshaler interface
 func (u *URL) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) {
 	var v string
 	d.DecodeElement(&v, &start)
 	*u, err = New(strings.TrimSpace(v))
+	return err
+}
+
+// UnmarshalXMLAttr implements the xml.UnmarshalerAttr interface
+func (u *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
+	*u, err = New(strings.TrimSpace(attr.Value))
 	return err
 }
 
